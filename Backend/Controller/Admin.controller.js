@@ -19,4 +19,23 @@ const Admin=async(req,res)=>{
         res.status(500).json({message:error.message})
     }
 }
-export {Admin}
+const GetProfile=async(req,res)=>{
+    try {
+        const Data=await pool.query("SELECT * FROM pd")
+        const TransactionData=await pool.query("SELECT m.*, p.name FROM money_history m INNER JOIN person p ON m.person_id = p.person_id ORDER BY m.created_at DESC;")
+        res.status(200).json({success:true,message:Data.rows,transaction:TransactionData.rows})
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({success:false,message:"Internal server error"})
+    }
+}
+const ResetProfile=async(req,res)=>{
+    try {
+        const Reset=await pool.query("UPDATE pd SET invested=0,geted=0,profit=0 WHERE id=1")
+        res.status(200).json({success:true,message:"Reseted"})
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({success:false,message:"Internal server error"})
+    }
+}
+export {Admin,GetProfile,ResetProfile}

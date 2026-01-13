@@ -58,7 +58,7 @@ const IPOfillup = async (req, res) => {
     try {
         const Details = await pool.query(`SELECT * FROM ipo WHERE ipo_id=${ipo}`);
         const IPO_Details = Details.rows[0];
-        const Transaction = await History(customer, IPO_Details.price, "Credit")
+        const Transaction = await History(customer, IPO_Details.price, "Debit")
         if (!Transaction) {
             return res.json({ success: false, message: "Transaction Failed" })
         }
@@ -75,22 +75,83 @@ const IPOfillup = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error" })
     }
 }
-const AllotmatStatus=async(req,res)=>{
-    const {id}=req.params;
-    const {status}=req.body;
-    if(!status){
-        return res.json({success:false,message:"status must required"})
+const AllotmatStatus = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    if (!id) {
+        return res.status(400).json({
+            success: false,
+            message: "Application id is required"
+        });
+    }
+    if (!status) {
+        return res.json({ success: false, message: "status must required" })
     }
     try {
-        if(status==="ALLOTTED"){
-            const update=await pool.query(`UPDATE ipo_fillup SET status='ALLOTTED' WHERE id=${id}`);
-            
+        if (status === "ALLOTTED") {
+            const profit = await pool.query(`SELECT p.profit,i.person_id from ipo_fillup i inner join ipo p on i.ipo_id=p.ipo_id where id=${id}`)
+            await History(profit.rows[0].person_id, profit.rows[0].profit, "Debit")
+            const ProfitCalc = (profit.rows[0].profit) * 30 / 100;
+            const update_profit = await pool.query(`UPDATE pd SET profit=profit+${ProfitCalc},invested=invested+${profit.rows[0].profit} WHERE id=1`)
+            const update = await pool.query(`UPDATE ipo_fillup SET status='ALLOTTED' WHERE id=${id} RETURNING *`);
+
         }
-        if()
-        
+        if (status === "NOT ALLOTTED") {
+            const update = await pool.query(`UPDATE ipo_fillup SET status='NOT ALLOTTED' WHERE id=${id} RETURNING *`);
+
+        }
+        res.json({ success: true })
 
     } catch (error) {
-        
+        console.log(error);
+        res.status(500).json({ success: false, message: "Internal server error" })
     }
 }
-export { Register, UpdateIPO, IPOfillup }
+const AllIPOs = async (req, res) => {
+    try {
+        const IPO = await pool.query("SELECT * FROM ipo");
+        res.status(200).json({ success: true, message: IPO.rows })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: "Internal server error" })
+    }
+}
+const IPOfilled = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const Data = await pool.query(`SELECT i.id as application_id,i.status,i.active,p.name,p.pan_id FROM ipo_fillup i inner join person p on i.person_id=p.person_id where ipo_id=${id}`)
+        res.status(200).json({ success: true, message: Data.rows })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: "Internal server error" })
+    }
+}
+const DeActive = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result=await pool.query(`SELECT i.person_id,i.status,n.price,n.profit FROM ipo_fillup i inner join ipo n on i.ipo_id=n.ipo_id WHERE id=${id}`);
+        const Data=result.rows[0];
+        console.log(Data)
+        if(Data.status==="ALLOTTED"){
+            const Total=Number(Data.price)+Number(Data.profit)
+            await pool.query(`UPDATE pd SET geted=geted+${Total} WHERE id=1`)
+            await History(Data.person_id,Total,"Credit");
+        }
+        if(Data.status==="NOT ALLOTTED"){
+            await History(Data.person_id,Number(Data.price),"Credit");
+            const Total=Number(Data.price)
+            await pool.query(`UPDATE pd SET geted=geted+${Total} WHERE id=1`)
+        }
+        const DeActive = await pool.query(`UPDATE ipo_fillup SET active=false where id=${id}`);
+        if (!DeActive) {
+            return res.json({ success: false, message: "Can't DeActive" })
+        }
+        res.json({success:true,message:"Successfull!"})
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: "Internal server error" })
+    }
+
+}
+export { Register, UpdateIPO, IPOfillup, AllotmatStatus, AllIPOs, IPOfilled,DeActive }

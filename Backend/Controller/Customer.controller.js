@@ -12,7 +12,7 @@ const Register = async (req, res) => {
         if (!Person) {
             return res.json({ success: false, message: "Can't Registed" })
         }
-        res.json({ success: false, message: "Registed Successfully!" })
+        res.json({ success: true, message: "Registed Successfully!" })
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: "Internal server error" })
@@ -47,7 +47,16 @@ const Delete=async(req,res)=>{
         res.status(200).json({success:true,message:"Deleted succesfully!"})
     } catch (error) {
         console.log(error);
-        res.json({ success: false, message: "Internal server error" })
+        res.status(500),json({ success: false, message: "Internal server error" })
     }
 }
-export { Register, Update,Delete }
+const GetPerson=async(req,res)=>{
+    try {
+        const Data=await pool.query("SELECT * FROM person");
+        res.status(200).json({success:true,message:Data.rows})
+    } catch (error) {
+        console.log(error)
+        res.status(500),json({ success: false, message: "Internal server error" })
+    }
+}
+export { Register, Update,Delete,GetPerson}

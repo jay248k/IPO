@@ -3,8 +3,9 @@ import './utils/db.js';
 import { AdminRouter } from './Routes/Admin.route.js';
 import { IPORouter } from './Routes/IPO.route.js';
 import { CustomerRouter } from './Routes/Customer.route.js';
+import cors from 'cors';
 const app=express();
-
+app.use(cors())
 app.use(express.json());
 app.use('/api/admin',AdminRouter)
 app.use('/api/ipo',IPORouter)
