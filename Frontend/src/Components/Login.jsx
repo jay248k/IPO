@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 function Login() {
+  const API_BASE_URL = import.meta.env.VITE_URL;
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -32,15 +33,7 @@ function Login() {
 
       if (res.data.success) {
         sessionStorage.setItem("isAuth", "true");
-
-        toast.success(res.data.message || "Login Success", {
-          style: {
-            background: "#ffffff",
-            color: "#000000",
-          },
-        });
-
-        setTimeout(() => navigate("/home"), 1200);
+        navigate("/home")
       } else {
         toast.error("Incorrect password", {
           style: {

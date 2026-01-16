@@ -4,8 +4,7 @@ import dotenv from 'dotenv'
 dotenv.config();
 
 const pool = new Pool({
-  connectionString:
-    "postgresql://neondb_owner:npg_3kcVxsDAQ4tW@ep-nameless-tree-ahhkivhh-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+  connectionString:process.env.DB_URL,
   ssl: { rejectUnauthorized: false }
 });
 
