@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 function AllPerson() {
+  const API_BASE_URL = import.meta.env.VITE_URL;
   const [persons, setPersons] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -19,8 +20,9 @@ function AllPerson() {
 
   const fetchPersons = async () => {
     setLoading(true);
+    
     try {
-      const res = await axios.get("http://localhost:8080/api/customer/get-persons");
+      const res = await axios.get(`${API_BASE_URL}/api/customer/get-persons`);
       if (res.data.success) {
         setPersons(res.data.message);
       }
@@ -37,7 +39,7 @@ function AllPerson() {
 
   const handleDelete = async () => {
     try {
-      const res = await axios.delete(`http://localhost:8080/api/customer/${deleteId}/delete`);
+      const res = await axios.delete(`${API_BASE_URL}/api/customer/${deleteId}/delete`);
       if (res.data.success) {
         toast.success("Person deleted");
         fetchPersons();
@@ -53,7 +55,7 @@ function AllPerson() {
     e.preventDefault();
     try {
       const res = await axios.put(
-        `http://localhost:8080/api/customer/${updateData.person_id}/update`,
+        `${API_BASE_URL}/api/customer/${updateData.person_id}/update`,
         {
           name: updateData.name,
           pan_id: updateData.pan_id,

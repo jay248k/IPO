@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 function Home() {
+  const API_BASE_URL = import.meta.env.VITE_URL;
   const [ipos, setIpos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -14,12 +15,15 @@ function Home() {
   const fetchIPOs = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:8080/api/ipo/all-ipos");
+      const res = await axios.get(`${API_BASE_URL}/api/ipo/all-ipos`);
       if (res.data.success) {
-        setIpos(res.data.message);
+        setIpos(res.data.message || []);
+      } else {
+        setIpos([]);
       }
     } catch {
       toast.error("Server error while fetching IPOs");
+      setIpos([]);
     } finally {
       setLoading(false);
     }
@@ -39,7 +43,7 @@ function Home() {
     e.preventDefault();
     try {
       const res = await axios.put(
-        `http://localhost:8080/api/ipo/${editIPO.ipo_id}/update`,
+        `${API_BASE_URL}/api/ipo/${editIPO.ipo_id}/update`,
         editIPO,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -56,18 +60,13 @@ function Home() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
     setEditIPO((prev) => {
       const updated = { ...prev, [name]: value };
-      
-      // AUTO-CALCULATE PROFIT: (Price * (GMP / 100))
       if (name === "price" || name === "gmp") {
         const price = Number(updated.price || 0);
         const gmpPercent = Number(updated.gmp || 0);
-        // Using toFixed(2) to avoid long decimal strings in the UI
         updated.profit = ((price * gmpPercent) / 100).toFixed(2);
       }
-      
       return updated;
     });
   };
@@ -83,6 +82,18 @@ function Home() {
           {[1, 2, 3].map((i) => (
             <div key={i} className="w-full h-24 bg-gray-200 animate-pulse rounded-xl"></div>
           ))}
+        </div>
+      ) : ipos.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-dashed border-gray-300 shadow-sm">
+          <div className="text-5xl mb-4">📊</div>
+          <h2 className="text-xl font-bold text-gray-800">No IPOs Available</h2>
+          <p className="text-gray-500 mt-2">There are currently no IPO listings in the database.</p>
+          <button 
+            onClick={fetchIPOs}
+            className="mt-6 px-6 py-2 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition"
+          >
+            Refresh Data
+          </button>
         </div>
       ) : (
         <>
@@ -206,9 +217,8 @@ function Home() {
                 </div>
               </div>
 
-              {/* READ-ONLY PROFIT DISPLAY */}
               <div className="pt-2">
-                <div className="bg-blue-600 p-5 rounded-2xl shadow-lg shadow-blue-100 flex justify-between items-center transition-all">
+                <div className="bg-blue-600 p-5 rounded-2xl shadow-lg shadow-blue-100 flex justify-between items-center">
                   <span className="text-xs font-bold text-blue-100 uppercase tracking-widest">Est. Profit Return</span>
                   <span className="text-2xl font-black text-white">₹{editIPO.profit}</span>
                 </div>

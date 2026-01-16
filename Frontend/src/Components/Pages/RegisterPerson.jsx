@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 function RegisterPerson() {
+  const API_BASE_URL = import.meta.env.VITE_URL;
   const [person, setPerson] = useState({
     name: "",
     pan_id: "",
@@ -36,7 +37,7 @@ function RegisterPerson() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/customer/register",
+        `${API_BASE_URL}/api/customer/register`,
         person,
         { headers: { "Content-Type": "application/json" } }
       );

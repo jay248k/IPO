@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 function RegisterIPO() {
+  const API_BASE_URL = import.meta.env.VITE_URL;
   const [ipo, setIpo] = useState({
     name: "",
     price: "",
@@ -41,7 +42,7 @@ function RegisterIPO() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/ipo/register",
+        `${API_BASE_URL}/api/ipo/register`,
         ipo,
         { headers: { "Content-Type": "application/json" } }
       );

@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 function Profile() {
+  const API_BASE_URL = import.meta.env.VITE_URL;
   const [profile, setProfile] = useState({
     invested: 0,
     geted: 0,
@@ -29,7 +30,7 @@ function Profile() {
   const fetchProfile = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:8080/api/admin/profile");
+      const res = await axios.get(`${API_BASE_URL}/api/admin/profile`);
       if (res.data.success) {
         setProfile(res.data.message[0] || { invested: 0, geted: 0, profit: 0 });
         setTransactions(res.data.transaction);
@@ -44,7 +45,7 @@ function Profile() {
   const handleReset = async () => {
     setShowConfirm(false);
     try {
-      const res = await axios.get("http://localhost:8080/api/admin/profile/reset");
+      const res = await axios.get(`${API_BASE_URL}/api/admin/profile/reset`);
       if (res.data.success) {
         toast.success("Profile reset successful");
         fetchProfile();

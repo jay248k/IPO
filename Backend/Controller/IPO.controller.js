@@ -151,7 +151,6 @@ const DeActive = async (req, res) => {
     try {
         const result = await pool.query(`SELECT i.person_id,i.status,n.price,n.profit FROM ipo_fillup i inner join ipo n on i.ipo_id=n.ipo_id WHERE id=${id}`);
         const Data = result.rows[0];
-        console.log(Data)
         if (Data.status === "ALLOTTED") {
             const Total = Number(Data.price) + Number(Data.profit)
             await pool.query(`UPDATE pd SET geted=geted+${Total} WHERE id=1`)

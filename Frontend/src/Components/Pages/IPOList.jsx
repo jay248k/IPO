@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 function IPOList() {
+  const API_BASE_URL = import.meta.env.VITE_URL;
   const { id: ipo_id } = useParams();
 
   const [list, setList] = useState([]);
@@ -15,7 +16,7 @@ function IPOList() {
 
   const fetchIPOList = async () => {
     try {
-      const res = await axios.get(`http://localhost:8080/api/ipo/${ipo_id}/get-all/filed`);
+      const res = await axios.get(`${API_BASE_URL}/api/ipo/${ipo_id}/get-all/filed`);
       if (res.data.success) setList(res.data.message);
     } catch {
       toast.error("Failed to load IPO list");
@@ -24,7 +25,7 @@ function IPOList() {
 
   const fetchPersons = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/customer/get-persons");
+      const res = await axios.get(`${API_BASE_URL}/api/customer/get-persons`);
       if (res.data.success) setAllPersons(res.data.message);
     } catch {
       toast.error("Failed to load persons");
@@ -44,7 +45,7 @@ function IPOList() {
     if (!person_id) return;
     setLoading(true);
     try {
-      const res = await axios.post(`http://localhost:8080/api/ipo/${ipo_id}/${person_id}/fillup`);
+      const res = await axios.post(`${API_BASE_URL}/api/ipo/${ipo_id}/${person_id}/fillup`);
       if (res.data.success) {
         toast.success("IPO filled successfully");
         setAllPersons((prev) => prev.filter((p) => p.person_id !== person_id));
@@ -59,7 +60,7 @@ function IPOList() {
 
   const updateStatus = async (appId, status) => {
     try {
-      const res = await axios.put(`http://localhost:8080/api/ipo/${appId}/update/status`, { status });
+      const res = await axios.put(`${API_BASE_URL}/api/ipo/${appId}/update/status`, { status });
       if (res.data.success) {
         toast.success("Status updated");
         await fetchIPOList();
@@ -71,7 +72,7 @@ function IPOList() {
 
   const updateActive = async (appId) => {
     try {
-      const res = await axios.post(`http://localhost:8080/api/ipo/${appId}/de-active`);
+      const res = await axios.post(`${API_BASE_URL}/api/ipo/${appId}/de-active`);
       if (res.data.success) {
         toast.success("Active updated");
         setList((prev) =>
