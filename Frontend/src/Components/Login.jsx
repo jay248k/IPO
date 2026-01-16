@@ -25,7 +25,7 @@ function Login() {
       setLoading(true);
 
       const res = await axios.post(
-        "${API_BASE_URL}/api/admin/register",
+        `${API_BASE_URL}/api/admin/register`,
         { password },
         { headers: { "Content-Type": "application/json" } }
       );
