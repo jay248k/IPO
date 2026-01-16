@@ -14,80 +14,18 @@ import IPOList from "./Components/Pages/IPOList";
 function App() {
   return (
     <BrowserRouter>
-      <ToastContainer
-        position="top-right"
-        autoClose={2500}
-        hideProgressBar
-        closeButton={false}
-      />
+      <ToastContainer position="top-right" autoClose={2500} hideProgressBar closeButton={false} />
 
       <Routes>
-        {/* Public Route */}
         <Route path="/" element={<Login />} />
 
-        {/* Protected Route with Navbar */}
-        <Route
-          path="/home"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Home />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/register-ipo"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <RegisterIPO/>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/register-person"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <RegisterPerson/>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Profile/>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/all-person"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <AllPerson/>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/ipo/:id"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <IPOList/>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/home" element={<ProtectedRoute><Layout><Home /></Layout></ProtectedRoute>} />
+        <Route path="/register-ipo" element={<ProtectedRoute><Layout><RegisterIPO /></Layout></ProtectedRoute>} />
+        <Route path="/register-person" element={<ProtectedRoute><Layout><RegisterPerson /></Layout></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
+        <Route path="/all-person" element={<ProtectedRoute><Layout><AllPerson /></Layout></ProtectedRoute>} />
+        <Route path="/ipo/:id" element={<ProtectedRoute><Layout><IPOList /></Layout></ProtectedRoute>} />
       </Routes>
-      
     </BrowserRouter>
   );
 }

@@ -19,7 +19,10 @@ const Register = async (req, res) => {
         return res.json({ success: false, message: "Details missing!" })
     }
     try {
-        const profit_calc = price * gmp / 100;
+        const numericPrice = Number(price);
+        const numericGmp = Number(gmp);
+
+        const profit_calc = (numericPrice * numericGmp) / 100;
         const Data = await pool.query('INSERT INTO ipo (name,price,starting_date,ending_date,listing,gmp,profit) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *', [
             name, price, starting_date, ending_date, listing, gmp, profit_calc
         ])
@@ -56,25 +59,41 @@ const IPOfillup = async (req, res) => {
     const { ipo, customer } = req.params;
 
     try {
-        const Details = await pool.query(`SELECT * FROM ipo WHERE ipo_id=${ipo}`);
-        const IPO_Details = Details.rows[0];
-        const Transaction = await History(customer, IPO_Details.price, "Debit")
-        if (!Transaction) {
-            return res.json({ success: false, message: "Transaction Failed" })
+        const details = await pool.query(
+            "SELECT * FROM ipo WHERE ipo_id = $1",
+            [ipo]
+        );
+
+        const IPO_Details = details.rows[0];
+        if (!IPO_Details) {
+            return res.json({ success: false, message: "IPO not found" });
         }
-        const Account = await pool.query(`UPDATE pd SET invested=invested+${IPO_Details.price} WHERE id=1`)
-        const MainData = await pool.query("INSERT INTO ipo_fillup (ipo_id,person_id,status,sending_money,active) VALUES ($1,$2,$3,$4,$5) RETURNING *", [
-            ipo, customer, "AWAIT", IPO_Details.price, true
-        ])
-        if (!MainData) {
-            return res.json({ success: false, message: "Can't Filled" })
+        const amount = Number(IPO_Details.price);
+
+        const transaction = await History(customer, amount, "Debit");
+        if (!transaction) {
+            return res.json({ success: false, message: "Transaction Failed" });
         }
-        res.json({ success: true, message: "Filled success" })
+
+        await pool.query(
+            "UPDATE pd SET invested = invested + $1 WHERE id = 1",
+            [amount]
+        );
+
+        await pool.query(
+            `INSERT INTO ipo_fillup 
+       (ipo_id, person_id, status, sending_money, active)
+       VALUES ($1,$2,$3,$4,$5)`,
+            [ipo, customer, "AWAIT", amount, true]
+        );
+
+        res.json({ success: true, message: "Filled success" });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ success: false, message: "Internal server error" })
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal server error" });
     }
-}
+};
+
 const AllotmatStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
@@ -109,10 +128,10 @@ const AllotmatStatus = async (req, res) => {
 }
 const AllIPOs = async (req, res) => {
     try {
-        const IPO = await pool.query("SELECT * FROM ipo");
+        const IPO = await pool.query("SELECT * FROM ipo ORDER BY ipo_id DESC");
         res.status(200).json({ success: true, message: IPO.rows })
     } catch (error) {
-        console.log(error);
+        console.log(error); 
         res.status(500).json({ success: false, message: "Internal server error" })
     }
 }
@@ -130,28 +149,28 @@ const IPOfilled = async (req, res) => {
 const DeActive = async (req, res) => {
     const { id } = req.params;
     try {
-        const result=await pool.query(`SELECT i.person_id,i.status,n.price,n.profit FROM ipo_fillup i inner join ipo n on i.ipo_id=n.ipo_id WHERE id=${id}`);
-        const Data=result.rows[0];
+        const result = await pool.query(`SELECT i.person_id,i.status,n.price,n.profit FROM ipo_fillup i inner join ipo n on i.ipo_id=n.ipo_id WHERE id=${id}`);
+        const Data = result.rows[0];
         console.log(Data)
-        if(Data.status==="ALLOTTED"){
-            const Total=Number(Data.price)+Number(Data.profit)
+        if (Data.status === "ALLOTTED") {
+            const Total = Number(Data.price) + Number(Data.profit)
             await pool.query(`UPDATE pd SET geted=geted+${Total} WHERE id=1`)
-            await History(Data.person_id,Total,"Credit");
+            await History(Data.person_id, Total, "Credit");
         }
-        if(Data.status==="NOT ALLOTTED"){
-            await History(Data.person_id,Number(Data.price),"Credit");
-            const Total=Number(Data.price)
+        if (Data.status === "NOT ALLOTTED") {
+            await History(Data.person_id, Number(Data.price), "Credit");
+            const Total = Number(Data.price)
             await pool.query(`UPDATE pd SET geted=geted+${Total} WHERE id=1`)
         }
         const DeActive = await pool.query(`UPDATE ipo_fillup SET active=false where id=${id}`);
         if (!DeActive) {
             return res.json({ success: false, message: "Can't DeActive" })
         }
-        res.json({success:true,message:"Successfull!"})
+        res.json({ success: true, message: "Successfull!" })
     } catch (error) {
         console.log(error);
         res.status(500).json({ success: false, message: "Internal server error" })
     }
 
 }
-export { Register, UpdateIPO, IPOfillup, AllotmatStatus, AllIPOs, IPOfilled,DeActive }
+export { Register, UpdateIPO, IPOfillup, AllotmatStatus, AllIPOs, IPOfilled, DeActive }

@@ -14,8 +14,8 @@ function Login() {
     if (!password) {
       toast.error("Password is required", {
         style: {
-          background: "#0A192F",
-          color: "#FFFFFF",
+          background: "#111111",
+          color: "#ffffff",
         },
       });
       return;
@@ -35,8 +35,8 @@ function Login() {
 
         toast.success(res.data.message || "Login Success", {
           style: {
-            background: "#64FFDA",
-            color: "#0A192F",
+            background: "#ffffff",
+            color: "#000000",
           },
         });
 
@@ -44,16 +44,16 @@ function Login() {
       } else {
         toast.error("Incorrect password", {
           style: {
-            background: "#0A192F",
-            color: "#FFFFFF",
+            background: "#111111",
+            color: "#ffffff",
           },
         });
       }
     } catch (error) {
       toast.error("Server error", {
         style: {
-          background: "#0A192F",
-          color: "#FFFFFF",
+          background: "#111111",
+          color: "#ffffff",
         },
       });
     } finally {
@@ -62,34 +62,45 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-navy">
-      <form
-        onSubmit={handleLogin}
-        className="w-[320px] bg-whitepure p-8 rounded-2xl shadow-xl"
-      >
-        <h2 className="text-2xl font-semibold text-navy text-center mb-6">
-          Admin Login
-        </h2>
+    <>
+      {/* Loader Overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-white/80 flex items-center justify-center z-50">
+          <div className="loader"></div>
+        </div>
+      )}
 
-        <input
-          type="password"
-          placeholder="Enter password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-3 mb-5 rounded-xl bg-gray-100 text-navy
-                     outline-none focus:ring-2 focus:ring-sky/60"
-        />
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3 rounded-xl bg-sky text-navy
-                     font-semibold hover:opacity-90 transition disabled:opacity-60"
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <form
+          onSubmit={handleLogin}
+          className="w-[320px] bg-gray-100 p-8 rounded-2xl shadow-lg"
         >
-          {loading ? "Checking..." : "Login"}
-        </button>
-      </form>
-    </div>
+          <h2 className="text-2xl font-semibold text-black text-center mb-8">
+            Admin Login
+          </h2>
+
+          <input
+            type="password"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-3 mb-6 rounded-xl
+                       bg-white text-black placeholder-gray-500
+                       outline-none focus:ring-2 focus:ring-black/20"
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 rounded-xl
+                       bg-black text-white font-semibold
+                       hover:opacity-90 transition disabled:opacity-60"
+          >
+            Login
+          </button>
+        </form>
+      </div>
+    </>
   );
 }
 
