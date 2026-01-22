@@ -25,7 +25,6 @@ function App() {
         <Route path="/profile" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
         <Route path="/all-person" element={<ProtectedRoute><Layout><AllPerson /></Layout></ProtectedRoute>} />
         <Route path="/ipo/:id" element={<ProtectedRoute><Layout><IPOList /></Layout></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
