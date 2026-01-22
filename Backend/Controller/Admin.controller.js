@@ -6,7 +6,7 @@ const Admin=async(req,res)=>{
         return res.json({success:false,message:"Password must required"})
     }
     try {
-        const admin=await pool.query("SELECT * FROM admin where admin_id=4")
+        const admin=await pool.query("SELECT password FROM admin WHERE admin_id = 4")
         const AdminPassword=admin.rows[0].password
         const verify=await bcrypt.compare(password,AdminPassword);
         
