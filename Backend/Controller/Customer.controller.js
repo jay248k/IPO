@@ -59,4 +59,36 @@ const GetPerson=async(req,res)=>{
         res.status(500),json({ success: false, message: "Internal server error" })
     }
 }
-export { Register, Update,Delete,GetPerson}
+const UnfiledList = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const result = await pool.query(
+            `
+            SELECT p.person_id,p.name
+            FROM person p
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM ipo_fillup i
+                WHERE i.person_id = p.person_id
+                AND i.ipo_id = $1
+            )
+            `,
+            [id]
+        );
+
+        res.status(200).json({
+            success: true,
+            data: result.rows
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Server Error"
+        });
+    }
+};
+
+export { Register, Update,Delete,GetPerson,UnfiledList}
