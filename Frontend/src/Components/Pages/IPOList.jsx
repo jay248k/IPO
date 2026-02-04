@@ -26,8 +26,15 @@ function IPOList() {
 
   const fetchPersons = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/customer/get-persons`);
-      if (res.data.success) setAllPersons(res.data.message);
+      console.log(ipo_id)
+      const res = await axios.get(`${API_BASE_URL}/api/customer/${ipo_id}/person`);
+      console.log(res.data)
+      if (Array.isArray(res.data.data)) {
+        setAllPersons(res.data.data);
+      } else if (res.data.success && Array.isArray(res.data.data)) {
+        setAllPersons(res.data.data);
+      }
+
     } catch {
       toast.error("Failed to load persons");
     }
@@ -73,8 +80,6 @@ function IPOList() {
   };
 
   const updateActive = async (appId) => {
-    // Optional: Add confirmation before locking
-    if (!window.confirm("Once you set this to 'No', it cannot be changed back. Continue?")) return;
 
     try {
       const res = await axios.post(`${API_BASE_URL}/api/ipo/${appId}/de-active`);
@@ -99,8 +104,9 @@ function IPOList() {
 
   const hasActiveYes = list.some((i) => i.active);
 
-  const unFiledPersons = !loadingData
-    ? allPersons.filter((p) => !list.some((l) => String(l.person_id) === String(p.person_id)))
+  // Replace your old unFiledPersons logic with this:
+  const unFiledPersons = !loadingData && Array.isArray(allPersons)
+    ? allPersons
     : [];
 
   const sortedList = [...list].sort((a, b) => {
@@ -124,8 +130,13 @@ function IPOList() {
         ) : (
           <>
             {/* FILE IPO SELECTOR */}
+            {/* FILE IPO SELECTOR */}
             <div className="mb-8 bg-blue-50 p-4 rounded-xl border border-blue-100">
-              <label className="block text-sm font-semibold text-blue-900 mb-2">File New Application</label>
+              <label className="block text-sm font-semibold text-blue-900 mb-2">
+                File New Application
+              </label>
+
+              {/* Logic: Show dropdown if we have people, otherwise show a 'No data' message */}
               {unFiledPersons.length > 0 ? (
                 <select
                   className="w-full md:max-w-xs bg-white border border-blue-200 rounded-lg px-4 py-2.5 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
@@ -137,11 +148,15 @@ function IPOList() {
                 >
                   <option value="" disabled>Choose a person...</option>
                   {unFiledPersons.map((p) => (
-                    <option key={p.person_id} value={p.person_id}>{p.name}</option>
+                    <option key={p.person_id} value={p.person_id}>
+                      {p.name}
+                    </option>
                   ))}
                 </select>
               ) : (
-                <p className="text-blue-600 text-sm italic">All available persons have filed.</p>
+                <p className="text-blue-600 text-sm italic">
+                  No persons found in the database.
+                </p>
               )}
             </div>
 
@@ -158,7 +173,7 @@ function IPOList() {
                       {item.status}
                     </span>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4 border-t pt-3">
                     <div>
                       <p className="text-xs text-gray-400 mb-1">Active State</p>
