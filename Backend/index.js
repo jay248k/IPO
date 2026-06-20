@@ -15,7 +15,9 @@ app.use(express.json());
 app.use('/api/admin',AdminRouter)
 app.use('/api/ipo',IPORouter)
 app.use('/api/customer',CustomerRouter)
-
+app.get('/', (req, res) => {
+  res.send('Server is running');
+});
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT,() => {
